@@ -1,4 +1,4 @@
-module heltra_gmo
+module base
 
 go 1.18
 
