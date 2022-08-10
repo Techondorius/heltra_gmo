@@ -12,12 +12,12 @@ services:
       - .:/go/src
     tty: true
     depends_on:
-      - "db"
+      - "database"
     environment:
       TZ: Asia/Tokyo
 
   db:
-    container_name: db
+    container_name: database
     image: mysql:8.0.15
     tmpfs:
       - /var/lib/mysql

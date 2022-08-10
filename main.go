@@ -5,22 +5,26 @@ import (
 	"encoding/json"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"heltra_gmo/docker/dev_app/pkg/model/database"
+	"heltra_gmo/middlware"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
 	// DBマイグレーション
 	// model.Connectionがエラー発生しなくなるまで=DBが立ち上がるまで待機
 	// (docker composeで立ち上げると必ずdbのほうが立ち上がり遅い)
-
-	//_, dbConErr := model.Connection()
-	//for dbConErr != nil {
-	//	time.Sleep(time.Second)
-	//	_, dbConErr = model.Connection()
-	//}
-	//migration.Mig()
+	_, dbConErr := database.Connection()
+	for dbConErr != nil {
+		time.Sleep(time.Second)
+		_, dbConErr = database.Connection()
+	}
+	if err := database.Migration(); err != nil {
+		panic(err)
+	}
 
 	r := gin.Default()
 
@@ -39,6 +43,18 @@ func main() {
 			"message": "hi",
 		})
 	})
+
+	var GinJWT = middlware.AuthMiddleware
+
+	r.Use(GinJWT.MiddlewareFunc())
+
+	// When you use jwt.New(), the function is already automatically called for checking,
+	// which means you don't need to call it again.
+	errInit := GinJWT.MiddlewareInit()
+
+	if errInit != nil {
+		log.Fatal("authMiddleware.MiddlewareInit() Error:" + errInit.Error())
+	}
 
 	_ = r.Run()
 }

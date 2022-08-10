@@ -13,7 +13,7 @@ services:
       TZ: Asia/Tokyo
 
   db:
-    container_name: db
+    container_name: database
     image: mysql:8.0.15
     volumes:
       - ./mysql:/var/lib/mysql
