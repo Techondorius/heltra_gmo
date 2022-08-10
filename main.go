@@ -39,8 +39,14 @@ func main() {
 	r.POST("/register", controller.Register)
 	r.GET("/getUser", controller.GetUser)
 
+	r.POST("/login", middleware.AuthMiddleware.LoginHandler)
+
 	var GinJWT = middleware.AuthMiddleware
-	r.Use(GinJWT.MiddlewareFunc())
+	auth := r.Group("/api/auth")
+	auth.Use(GinJWT.MiddlewareFunc())
+	{
+		auth.GET("/getUser", controller.GetUser)
+	}
 
 	_ = r.Run()
 }

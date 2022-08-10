@@ -5,17 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"heltra_gmo/pkg/controller"
 	"heltra_gmo/pkg/model"
+	"log"
 	"time"
 )
 
 var identityKey = "id"
 
 type user model.User
-
-type login struct {
-	userID   string `json:"userID" binding:"required"`
-	password string `json:"password" binding:"required"`
-}
 
 var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 	Realm:       "asdf",
@@ -24,10 +20,14 @@ var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 	MaxRefresh:  time.Hour,
 	IdentityKey: identityKey,
 	PayloadFunc: func(data interface{}) jwt.MapClaims {
+		log.Println(data)
 		if v, ok := data.(*model.User); ok {
+			log.Println("here")
 			return jwt.MapClaims{
 				identityKey: v.UserID,
 			}
+		} else {
+			log.Println(v)
 		}
 		return jwt.MapClaims{}
 	},
@@ -39,6 +39,7 @@ var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 	},
 	Authenticator: func(c *gin.Context) (interface{}, error) {
 		var loginVals model.Login
+		log.Println("Authenticator called")
 		if err := c.ShouldBindJSON(&loginVals); err != nil {
 			return "", jwt.ErrMissingLoginValues
 		}
@@ -46,8 +47,7 @@ var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 		if controller.ComparePassword(loginVals.UserID, loginVals.Password) {
 			u := model.User{UserID: loginVals.UserID}
 			_ = u.Read()
-			return u, nil
-
+			return &u, nil
 		}
 
 		return nil, jwt.ErrFailedAuthentication
