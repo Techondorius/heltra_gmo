@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"heltra_gmo/docker/dev_app/pkg/model/database"
-	"heltra_gmo/middlware"
-	"io/ioutil"
+	"heltra_gmo/middleware"
+	"heltra_gmo/pkg/controller"
+	"heltra_gmo/pkg/model"
 	"log"
 	"net/http"
 	"time"
@@ -17,18 +15,18 @@ func main() {
 	// DBマイグレーション
 	// model.Connectionがエラー発生しなくなるまで=DBが立ち上がるまで待機
 	// (docker composeで立ち上げると必ずdbのほうが立ち上がり遅い)
-	_, dbConErr := database.Connection()
+	_, dbConErr := model.Connection()
 	for dbConErr != nil {
 		time.Sleep(time.Second)
-		_, dbConErr = database.Connection()
+		_, dbConErr = model.Connection()
 	}
-	if err := database.Migration(); err != nil {
+	if err := model.Migration(); err != nil {
 		panic(err)
 	}
 
 	r := gin.Default()
 
-	r.Use(logger())
+	r.Use(middleware.Logger())
 
 	// Cors
 	config := cors.DefaultConfig()
@@ -43,8 +41,10 @@ func main() {
 			"message": "hi",
 		})
 	})
+	r.POST("/register", controller.Register)
+	r.GET("/getUser", controller.GetUser)
 
-	var GinJWT = middlware.AuthMiddleware
+	var GinJWT = middleware.AuthMiddleware
 
 	r.Use(GinJWT.MiddlewareFunc())
 
@@ -57,19 +57,4 @@ func main() {
 	}
 
 	_ = r.Run()
-}
-
-func logger() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		log.Println("Endpoint: " + c.Request.URL.Path)
-		q := c.Request.URL.Query()
-		j, _ := json.Marshal(q)
-		log.Println("Query Params: " + string(j))
-
-		ByteBody, _ := ioutil.ReadAll(c.Request.Body)
-		c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(ByteBody))
-		log.Println("Body: " + string(ByteBody))
-
-		c.Next()
-	}
 }

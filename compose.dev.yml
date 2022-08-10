@@ -12,7 +12,7 @@ services:
       - .:/go/src
     tty: true
     depends_on:
-      - "database"
+      - "db"
     environment:
       TZ: Asia/Tokyo
 

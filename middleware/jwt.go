@@ -1,9 +1,10 @@
-package middlware
+package middleware
 
 import (
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"heltra_gmo/docker/dev_app/pkg/model"
+	"heltra_gmo/pkg/controller"
+	"heltra_gmo/pkg/model"
 	"time"
 )
 
@@ -37,19 +38,15 @@ var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 		}
 	},
 	Authenticator: func(c *gin.Context) (interface{}, error) {
-		var loginVals login
-		if err := c.ShouldBind(&loginVals); err != nil {
+		var loginVals model.Login
+		if err := c.ShouldBindJSON(&loginVals); err != nil {
 			return "", jwt.ErrMissingLoginValues
 		}
-		userID := loginVals.userID
-		password := loginVals.password
 
-		if (userID == "scott" && password == "secret01") ||
-			(userID == "john" && password == "secret02") ||
-			(userID == "mary" && password == "secret03") {
-			return &user{
-				UserID: "asdl0606",
-			}, nil
+		if controller.ComparePassword(loginVals.UserID, loginVals.Password) {
+			u := model.User{UserID: loginVals.UserID}
+			_ = u.Read()
+			return u, nil
 
 		}
 

@@ -1,13 +1,12 @@
-package database
+package model
 
 import (
-	"heltra_gmo/docker/dev_app/pkg/model"
 	"log"
 )
 
 func Migration() error {
 	db, _ := Connection()
-	err := db.AutoMigrate(model.User{})
+	err := db.AutoMigrate(User{})
 	if err != nil {
 		return err
 	}
