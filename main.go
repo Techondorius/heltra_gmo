@@ -1,12 +1,8 @@
 package main
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"heltra_gmo/middleware"
-	"heltra_gmo/pkg/controller"
 	"heltra_gmo/pkg/model"
-	"net/http"
+	"heltra_gmo/pkg/router"
 	"time"
 )
 
@@ -23,30 +19,6 @@ func main() {
 		panic(err)
 	}
 
-	r := gin.Default()
-	r.Use(middleware.Logger())
-
-	// Cors
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	r.Use(cors.New(config))
-
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "hi",
-		})
-	})
-	r.POST("/register", controller.Register)
-	r.GET("/getUser", controller.GetUser)
-
-	r.POST("/login", middleware.AuthMiddleware.LoginHandler)
-
-	var GinJWT = middleware.AuthMiddleware
-	auth := r.Group("/api/auth")
-	auth.Use(GinJWT.MiddlewareFunc())
-	{
-		auth.GET("/getUser", controller.GetUser)
-	}
-
+	r := router.Router()
 	_ = r.Run()
 }

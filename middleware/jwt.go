@@ -11,8 +11,6 @@ import (
 
 var identityKey = "id"
 
-type user model.User
-
 var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 	Realm:       "asdf",
 	Key:         []byte("sec"),
@@ -24,7 +22,7 @@ var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 		if v, ok := data.(*model.User); ok {
 			log.Println("here")
 			return jwt.MapClaims{
-				identityKey: v.UserID,
+				identityKey: v.ID,
 			}
 		} else {
 			log.Println(v)
@@ -33,13 +31,14 @@ var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 	},
 	IdentityHandler: func(c *gin.Context) interface{} {
 		claims := jwt.ExtractClaims(c)
-		return &user{
-			UserID: claims[identityKey].(string),
+		log.Printf("%T\n", claims[identityKey])
+		log.Println(int(claims[identityKey].(float64)))
+		return &model.User{
+			ID: int(claims[identityKey].(float64)),
 		}
 	},
 	Authenticator: func(c *gin.Context) (interface{}, error) {
 		var loginVals model.Login
-		log.Println("Authenticator called")
 		if err := c.ShouldBindJSON(&loginVals); err != nil {
 			return "", jwt.ErrMissingLoginValues
 		}
