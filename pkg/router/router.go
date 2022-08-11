@@ -31,9 +31,10 @@ func Router() *gin.Engine {
 
 	auth := r.Group("/api/auth")
 	auth.Use(middleware.AuthMiddleware.MiddlewareFunc())
+	user := auth.Group("/user")
 	{
-		auth.GET("/getMyself", controller.GetMyself)
-		auth.GET("/getUser", controller.GetUser)
+		user.GET("/getMyself", controller.GetMyself)
+		user.GET("/getUser", controller.GetUser)
 	}
 	return r
 }

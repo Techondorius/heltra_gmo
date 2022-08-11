@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"heltra_gmo/pkg/controller"
 	"heltra_gmo/pkg/model"
-	"log"
 	"time"
 )
 
@@ -18,21 +17,15 @@ var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 	MaxRefresh:  time.Hour,
 	IdentityKey: identityKey,
 	PayloadFunc: func(data interface{}) jwt.MapClaims {
-		log.Println(data)
 		if v, ok := data.(*model.User); ok {
-			log.Println("here")
 			return jwt.MapClaims{
 				identityKey: v.ID,
 			}
-		} else {
-			log.Println(v)
 		}
 		return jwt.MapClaims{}
 	},
 	IdentityHandler: func(c *gin.Context) interface{} {
 		claims := jwt.ExtractClaims(c)
-		log.Printf("%T\n", claims[identityKey])
-		log.Println(int(claims[identityKey].(float64)))
 		return &model.User{
 			ID: int(claims[identityKey].(float64)),
 		}
