@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"heltra_gmo/pkg/controller"
 	"heltra_gmo/pkg/model"
+	"heltra_gmo/pkg/model/dao"
 	"time"
 )
 
@@ -31,7 +32,7 @@ var AuthMiddleware, _ = jwt.New(&jwt.GinJWTMiddleware{
 		}
 	},
 	Authenticator: func(c *gin.Context) (interface{}, error) {
-		var loginVals model.Login
+		var loginVals dao.LoginReq
 		if err := c.ShouldBindJSON(&loginVals); err != nil {
 			return "", jwt.ErrMissingLoginValues
 		}

@@ -15,6 +15,7 @@ services:
       - "db"
     environment:
       TZ: Asia/Tokyo
+      GIN_MODE: debug
 
   db:
     container_name: db

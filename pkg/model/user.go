@@ -1,9 +1,19 @@
 package model
 
+import (
+	"time"
+)
+
 type User struct {
-	ID       int    `gorm:"primaryKey;autoIncrement" json:"intID"`
-	UserID   string `gorm:"not null;unique" json:"userID"`
-	Password string `gorm:"not null" json:"-"`
+	ID        int       `gorm:"primaryKey;autoIncrement" json:"id"`
+	UserID    string    `gorm:"not null;unique" json:"userID"`
+	Password  string    `gorm:"not null" json:"-"`
+	Name      string    `gorm:"not null" json:"name"`
+	Birthdate time.Time `gorm:"not null" json:"birthdate"`
+	Sex       int       `gorm:"not null;size:2" json:"sex"`
+	Height    int       `gorm:"not null" json:"height"`
+	Weight    int       `gorm:"not null" json:"weight"`
+	Objective int       `gorm:"not null" json:"objective"`
 }
 
 func (u *User) Create() error {

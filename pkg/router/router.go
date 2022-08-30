@@ -20,7 +20,7 @@ func Router() *gin.Engine {
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "hi",
+			"message": "hii",
 		})
 	})
 	r.POST("/api/login", middleware.AuthMiddleware.LoginHandler)
